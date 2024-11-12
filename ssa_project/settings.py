@@ -29,10 +29,6 @@ RECAPTCHA_SECRET_KEY = "6LeMCW8qAAAAAOk5jjdIsjuxi-86RP3DSKleU8l9"
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
-
-# Application definition
-
 INSTALLED_APPS = [
     'users',
     'chipin',
