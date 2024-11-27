@@ -4,7 +4,9 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import UserRegistrationForm
+from .forms import TopUpForm, UserRegistrationForm
+from .models import Profile, Transaction
+
 
 def register(request):
     if request.method == "POST":
@@ -79,3 +81,20 @@ def login_view(request):
 def user_view(request):
     profile = request.user.profile  # Get the logged-in user's profile
     return render(request, 'users/user.html', {'balance': profile.balance})
+
+@login_required
+def top_up(request):
+    profile = request.user.profile 
+    if request.method == "POST":
+        form = TopUpForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            profile.balance += amount
+            profile.save()
+            messages.success(request, f"Your balance has been topped up by ${amount}.")
+            return redirect('users:user')
+    else:
+        form = TopUpForm()
+    return render(request, 'users/top_up.html', {'form': form})
+
+##Step 4, Its broken lol.  Have fun :)
