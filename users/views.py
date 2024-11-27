@@ -19,7 +19,11 @@ def register(request):
 
 @login_required(login_url='users:login')
 def user(request):
-    return render(request, "users/user.html")
+    profile = request.user.profile
+    return render(request, 'users/user.html', {
+        'user': request.user,
+        'balance': profile.balance
+    })
 
 def login_view(request):
     if request.method == "POST":
@@ -71,3 +75,7 @@ def login_view(request):
         else:
             messages.error(request, "Invalid username or password.")
     return render(request, "users/login.html")
+
+def user_view(request):
+    profile = request.user.profile  # Get the logged-in user's profile
+    return render(request, 'users/user.html', {'balance': profile.balance})
