@@ -5,6 +5,6 @@
 {% block content %} 
     <h1>Welcome, {{ user.first_name }}</h1>
     <p>Your current balance is ${{ balance }}</p>
-    <a href="{% url 'user:top_up' user.id %}">Make a Payment</a>
+    <a href="{% url 'users:top_up' %}">Make a Payment</a>
     <a href="{% url 'chipin:home' %}">Click through to ChipIn Functions</a>
 {% endblock %}
