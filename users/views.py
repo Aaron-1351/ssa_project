@@ -22,9 +22,11 @@ def register(request):
 @login_required(login_url='users:login')
 def user(request):
     profile = request.user.profile
+    transactions = Transaction.objects.all().filter(user=request.user).order_by('-created_at')
     return render(request, 'users/user.html', {
         'user': request.user,
-        'balance': profile.balance
+        'balance': profile.balance,
+        'transactions' : transactions,
     })
 
 def login_view(request):

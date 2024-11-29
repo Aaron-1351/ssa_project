@@ -62,6 +62,7 @@
                 {% if info.joined %}
                     <span class="joined">You have already joined this event.</span>
                     <a href="{% url 'chipin:leave_event' group.id event.id %}" class="btn btn-warning" onclick="return confirm('Are you sure you want to leave this event?');">Leave Event</a>
+                    <a href="{% url 'chipin:transfer_funds' group.id event.id %}">Transfer Funds</a>
                 {% else %}
                     <!-- If the user is eligible, show the "Join Event" link -->
                     {% if info.eligible %}

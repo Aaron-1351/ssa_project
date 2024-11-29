@@ -5,6 +5,27 @@
 {% block content %} 
     <h1>Welcome, {{ user.first_name }}</h1>
     <p>Your current balance is ${{ balance }}</p>
-    <a href="{% url 'users:top_up' %}">Make a Payment</a>
+    <a href="{% url 'users:top_up' %}">Top up Balance</a>
+    <br>
+    <br>
     <a href="{% url 'chipin:home' %}">Click through to ChipIn Functions</a>
+    <h2>Your Past Transactions:</h2>
+    {%if transactions %}
+        <div>
+            <table>
+                <tr>
+                    <td>Amount</td>
+                    <td>Date</td>
+                </tr>
+                {%for transaction in transactions %}
+                <tr>
+                    <th>${{ transaction.amount }}</th>
+                    <th>{{ transaction.created_at }}</th>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% else %}
+        <p>No past transactions to display.</p>
+    {% endif %}
 {% endblock %}

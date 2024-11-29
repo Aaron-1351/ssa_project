@@ -13,6 +13,10 @@ from .models import Group, Comment
 from .forms import CommentForm
 from .models import Event
 import urllib.parse
+from django.db import transaction
+from chipin.models import Event
+from users.models import Transaction
+from datetime import datetime
 
 @login_required
 def home(request):
@@ -173,6 +177,16 @@ def leave_event(request, group_id, event_id):
     event.save()
     return redirect('chipin:group_detail', group_id=group.id)
 
+@login_required
+def transfer_funds(request, group_id, event_id):
+    group = get_object_or_404(Group, id=group_id)
+    event = get_object_or_404(Event, id=event_id, group=group)
+    # Check if the user is part of the event
+    if request.user not in event.members.all():
+        messages.error(request, "You are not a member of this event.")
+        return redirect('chipin:group_detail', group_id=group.id)
+    
+    
 @login_required
 def delete_event(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
