@@ -6,13 +6,11 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.models import User
-from .forms import GroupCreationForm
-from .models import Group
-from .models import GroupJoinRequest
-from .models import Group, Comment
-from .forms import CommentForm
+from .models import Group, Comment, GroupJoinRequest
+from .forms import CommentForm, GroupCreationForm
 from .models import Event
 import urllib.parse
+from decimal import Decimal
 from django.db import transaction
 from chipin.models import Event
 from users.models import Transaction
@@ -181,12 +179,45 @@ def leave_event(request, group_id, event_id):
 def transfer_funds(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
     event = get_object_or_404(Event, id=event_id, group=group)
+    event_share = event.calculate_share()
+    Not_enough_money = False
+
     # Check if the user is part of the event
     if request.user not in event.members.all():
         messages.error(request, "You are not a member of this event.")
         return redirect('chipin:group_detail', group_id=group.id)
     
+    #check user balance to see if they can transfer
+    for member in group.members.all():
+        if member.profile.balance < event_share:
+            Not_enough_money = True
+            messages.error(request, "You do not have enough funds to make a transfer for this event. Top up your funds and then try again.")
+            return redirect('chipin:group_detail', group_id=group.id)
     
+    with transaction.atomic():
+            for member in event.members.all():
+                profile = member.profile
+                event_share = event.calculate_share()
+                profile.balance -= event_share 
+                profile.save()
+                Transaction.objects.create(user=member, amount=-event_share)
+
+            if request.user == group.admin:
+                profile = request.user.profile
+                total_spend = Event.objects.get(id=event_id).total_spend
+                addition = [profile.balance, Decimal(total_spend)]
+                Sum = sum(addition)
+                profile.balance = Sum
+                profile.save()
+                Transaction.objects.create(user=request.user, amount=total_spend)
+            else:
+                messages.error(request, "You aren't the admin of this group.")
+
+            event.save()
+            messages.success(request, "Funds transferred")
+            return redirect('chipin:group_detail', group_id=group.id)
+    
+
 @login_required
 def delete_event(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
