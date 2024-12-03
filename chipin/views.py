@@ -115,7 +115,10 @@ def join_event(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
     event = get_object_or_404(Event, id=event_id, group=group)
     event_share = event.calculate_share()  
-    # Check if the user is eligible to join based on their max spend
+    # Check if the user is eligible to join based on their max spend\
+    if event.status == "Archived":
+        messages.error(request, "You cannot join the event at this time as this event has been archived.")
+        return redirect('chipin:group_detail', group_id=group.id)
     if request.user.profile.max_spend < event_share:
         messages.error(request, f"Your max spend of ${request.user.profile.max_spend} is too low to join this event.")
         return redirect('chipin:group_detail', group_id=group.id)
@@ -164,6 +167,9 @@ def leave_event(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
     event = get_object_or_404(Event, id=event_id, group=group)
     # Check if the user is part of the event
+    if event.status == "Archived":
+        messages.error(request, "You cannot leave the event at this time as this event has been archived.")
+        return redirect('chipin:group_detail', group_id=group.id)
     if request.user not in event.members.all():
         messages.error(request, "You are not a member of this event.")
         return redirect('chipin:group_detail', group_id=group.id)
@@ -181,7 +187,9 @@ def transfer_funds(request, group_id, event_id):
     event = get_object_or_404(Event, id=event_id, group=group)
     event_share = event.calculate_share()
     Not_enough_money = False
-
+    if event.status == "Archived":
+        messages.error(request, "You cannot transfer funds to this event as it has already been funded and archived")
+        return redirect('chipin:group_detail', group_id=group.id)
     # Check if the user is part of the event
     if request.user not in event.members.all():
         messages.error(request, "You are not a member of this event.")
@@ -213,16 +221,21 @@ def transfer_funds(request, group_id, event_id):
             else:
                 messages.error(request, "You aren't the admin of this group.")
 
+            event.status = "Archived"
             event.save()
             messages.success(request, "Funds transferred")
             return redirect('chipin:group_detail', group_id=group.id)
-    
+
+
 
 @login_required
 def delete_event(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
     event = get_object_or_404(Event, id=event_id, group=group)
     # Ensure only the group admin can delete the event
+    if event.status == "Archived":
+        messages.error(request, "This event has been archived.")
+        return redirect('chipin:group_detail', group_id=group.id)
     if request.user != group.admin:
         messages.error(request, "Only the group administrator can delete events.")
         return redirect('chipin:group_detail', group_id=group.id)
