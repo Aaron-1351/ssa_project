@@ -234,7 +234,7 @@ def delete_event(request, group_id, event_id):
     event = get_object_or_404(Event, id=event_id, group=group)
     # Ensure only the group admin can delete the event
     if event.status == "Archived":
-        messages.error(request, "This event has been archived.")
+        messages.error(request, "You cannot delete this event because this event has been archived.")
         return redirect('chipin:group_detail', group_id=group.id)
     if request.user != group.admin:
         messages.error(request, "Only the group administrator can delete events.")
