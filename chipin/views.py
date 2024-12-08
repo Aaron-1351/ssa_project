@@ -186,19 +186,17 @@ def transfer_funds(request, group_id, event_id):
     group = get_object_or_404(Group, id=group_id)
     event = get_object_or_404(Event, id=event_id, group=group)
     event_share = event.calculate_share()
-    Not_enough_money = False
     if event.status == "Archived":
         messages.error(request, "You cannot transfer funds to this event as it has already been funded and archived")
         return redirect('chipin:group_detail', group_id=group.id)
     # Check if the user is part of the event
-    if request.user not in event.members.all():
-        messages.error(request, "You are not a member of this event.")
+    if request.user != group.admin: #only admins should be able to do this
+        messages.error(request, "You are not an admin.")
         return redirect('chipin:group_detail', group_id=group.id)
     
     #check user balance to see if they can transfer
     for member in group.members.all():
         if member.profile.balance < event_share:
-            Not_enough_money = True
             messages.error(request, "You do not have enough funds to make a transfer for this event. Top up your funds and then try again.")
             return redirect('chipin:group_detail', group_id=group.id)
     
