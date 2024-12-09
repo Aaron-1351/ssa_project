@@ -39,7 +39,10 @@ class Event(models.Model):
         members_count = self.group.members.count()
         if members_count == 0:
             return 0
-        return self.total_spend / members_count
+        else:
+            unround_share = self.total_spend / members_count #if share price is recurring decimal, break when subracting 
+            round_share = round(unround_share, 2)            #thing that 2 decimal places
+        return round_share
 
     def check_status(self):
         """ Check if all members' max spend can cover the event. """
