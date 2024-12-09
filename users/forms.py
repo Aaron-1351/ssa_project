@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+#form used for reigstration with requirements for passwrods, username, nickname and email
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
@@ -26,5 +27,6 @@ class UserRegistrationForm(UserCreationForm):
             profile.save()
         return user
     
+#Specifies the amount a user can top up and prevents negative amounts
 class TopUpForm(forms.Form):
     amount = forms.DecimalField(min_value=0.01, decimal_places=2, max_digits=5, label="Amount to Top-Up")

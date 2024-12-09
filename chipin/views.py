@@ -31,6 +31,7 @@ def home(request):
     }
     return render(request, 'chipin/home.html', context)
 
+#View for creating groups by accessing forms and checking if the form is from a valid user
 @login_required
 def create_group(request):
     if request.method == 'POST':
@@ -90,6 +91,7 @@ def group_detail(request, group_id, edit_comment_id=None):
         'event_share_info': event_share_info,
     })
 
+#Creates an event and assigns event ID with event name, date and spend
 @login_required
 def create_event(request, group_id):
     group = get_object_or_404(Group, id=group_id)
@@ -201,7 +203,8 @@ def transfer_funds(request, group_id, event_id):
             Not_enough_money = True
             messages.error(request, "You do not have enough funds to make a transfer for this event. Top up your funds and then try again.")
             return redirect('chipin:group_detail', group_id=group.id)
-    
+  
+    #transaction.atomic allows the table to be updated seamlessley
     with transaction.atomic():
             for member in event.members.all():
                 profile = member.profile
@@ -244,6 +247,7 @@ def delete_event(request, group_id, event_id):
     messages.success(request, f"The event '{event.name}' has been deleted.")
     return redirect('chipin:group_detail', group_id=group.id)
 
+#view for deleting a group
 @login_required
 def delete_group(request, group_id):
     group = get_object_or_404(Group, id=group_id)
@@ -254,6 +258,7 @@ def delete_group(request, group_id):
         messages.error(request, "You do not have permission to delete this group.")
     return redirect('chipin:home')
 
+#invites users by requsting user profiles that are not in the group and their nicknames and then being able to send an invite
 @login_required
 def invite_users(request, group_id):
     group = get_object_or_404(Group, id=group_id)
@@ -272,6 +277,7 @@ def invite_users(request, group_id):
         'users_not_in_group': users_not_in_group
     })
 
+#allows users to accept or reject invites to join a group
 @login_required
 def accept_invite(request, group_id):
     group = get_object_or_404(Group, id=group_id)

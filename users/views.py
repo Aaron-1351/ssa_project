@@ -7,7 +7,7 @@ from django.contrib import messages
 from .forms import UserRegistrationForm, TopUpForm
 from .models import Profile, Transaction
 
-
+#View for registering
 def register(request):
     if request.method == "POST":
         form = UserRegistrationForm(request.POST)
@@ -19,6 +19,7 @@ def register(request):
         form = UserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
+#View for user profile
 @login_required(login_url='users:login')
 def user(request):
     profile = request.user.profile
@@ -29,6 +30,7 @@ def user(request):
         'transactions' : transactions,
     })
 
+#View for the login page. Asks for username and password and checks them against profile
 def login_view(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -42,6 +44,7 @@ def login_view(request):
             messages.error(request, "Invalid Credentials.")
     return render(request, "users/login.html")
 
+#Lets Users Logout
 def logout_view(request):
     logout(request)
     messages.success(request, "Successfully logged out.")
@@ -49,6 +52,7 @@ def logout_view(request):
 import requests
 from django.conf import settings
 
+#View for the login page. Asks for username and password and checks them against profile. Verifies users with recaptcha
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -80,10 +84,12 @@ def login_view(request):
             messages.error(request, "Invalid username or password.")
     return render(request, "users/login.html")
 
+#Stores the logged in users profile and allows it to be returned with a balance
 def user_view(request):
     profile = request.user.profile  # Get the logged-in user's profile
     return render(request, 'users/user.html', {'balance': profile.balance})
 
+#View for topping up the balance of a user profile and creates a transaction for that top_up
 @login_required
 def top_up_balance(request):
     Profile = request.user.profile
